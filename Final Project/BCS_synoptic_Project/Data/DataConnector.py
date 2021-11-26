@@ -4,11 +4,13 @@ def DEBUG(text):
     if DEBUGON == True:
         print("DataConnector:\n",text)
 
-DEBUGON = False
+DEBUGON = True
 
 
 class ImageFile:
+    """Class Defines an Image file"""
     def __init__(self) -> None:
+        #get current directory name
         if getattr(sys, 'frozen', False):
             dname = os.path.dirname(sys.executable)
         elif __file__:
@@ -17,36 +19,39 @@ class ImageFile:
         self.image_path = rf'{dname}\no_image.png'
         self.image_name = os.path.split(self.image_path)[1].split(".")[0]
 
-    def setImage(self,filePath):
-            self.image_path = filePath
-            self.image_name = os.path.split(filePath)[1].split(".")[0]
+    def setImage(self,filePath)-> None:
+        """Method for setting the image path after object creation"""
+        self.image_path = filePath
+        self.image_name = os.path.split(filePath)[1].split(".")[0]
 
 class CategoryList:
+    """Class Defines a category list and methods for managing"""
     def __init__(self) -> None:
         self.categories = []
 
-    def getSize(self):
+    def getSize(self)->list:
+        """Method returns the size of the list"""
         DEBUG(f"GETSIZE: {len(self.categories)}")
         return len(self.categories)
 
-    def createCategory(self,name):
+    def createCategory(self,name)->None:
+        """Method for creating a category within the object"""
         self.categories.append(name)
 
-    def removeCategory(self,categoryName):
+    def removeCategory(self,categoryName)->None:
+        """Method for deleting a category within the object"""
         self.categories.remove(categoryName)
 
-    def updateCategory(self,oldName,newName):
+    def updateCategory(self,oldName,newName)->None:
+        """Method for renaming a category within the object"""
         for x in range(len(self.categories)):
             if self.categories[x] == oldName:
                 self.categories[x] = newName
 
 
-    def exportLibrary(self):
-        export = json.dumps(self.categories)
-        return export
-
 
 class MediaFile(ImageFile):
+    """Class defines a Mediafile Object"""
     def __init__(self,filePath) -> None:
         ImageFile.__init__(self)
         self.file_path = filePath
@@ -56,20 +61,26 @@ class MediaFile(ImageFile):
         self.categories = []
 
 class MediaLibrary:
+    """Class defines a media Library object"""
     def __init__(self) -> None:
         self.files = {}
         if self.getSize() == 0:
             self.keyCount = 1
         else:
             self.keyCount =  max(self.files.keys()) + 1
-    def getSize(self):
+
+    def getSize(self)->dict:
+        """Method returns the size of the list"""
         DEBUG(f"GETSIZE: {len(self.files)}")
         return len(self.files)
+
     def add_file(self,filePath):
+        """Method adds a new key to the object dict where the value is a MediaFile object from a filepath"""
         self.files[self.keyCount] = (MediaFile(filePath))
         self.keyCount +=1
 
     def add_folder(self,folderDir,fileTypes):
+        """Method adds a new keys to the object dict where the values are MediaFile objects from a selected directory"""
         for subdir, dir, files in os.walk(folderDir):
             for file in files:
                 file_path = subdir + os.sep + file
@@ -79,6 +90,7 @@ class MediaLibrary:
                     self.keyCount +=1
 
     def removeFile(self,fileid,filename,filetype):
+        """Method removed a file from the MediaLibrary object"""
         DEBUG(f"GETSIZE BEFORE REMOVE: {len(self.files)}")
         for key, value in self.files.items():
             if value.file_name == filename and value.file_type == filetype and key == fileid:
@@ -86,51 +98,38 @@ class MediaLibrary:
                 DEBUG(f"GETSIZE AFTER REMOVE: {len(self.files)}")
                 break
     
-    def get_file(self,dictKey):
+    def get_file(self,dictKey)->dict:
         return self.files.get(dictKey)
 
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-    def exportLibrary(self):
-        export = {}
-        export["MEDIALIBRARY"] = self.toJSON()
-        print(export)
-        with open("medialib.txt", "wb") as F:
-            pickle.dump(self.files,F)
-        return export
-
-    def importLibrary(self):
-        with open(r"C:\Users\martyn.bell\OneDrive - Vianet Limited\Apprentice stuff\Final Project\BCS_synoptic_Project\medialib.txt",'rb') as f:
-            raw_data = f.read()
-        deserialized = pickle.loads(raw_data)
-        self.files = deserialized
-        print(deserialized)
-        print(self.files)
 
 class PlaylistLibrary:
     def __init__(self) -> None:
         self.playlists = {}
-        #self.playlists["test"] = [(1,"A"),(2,"e"),(3,"w"),(4,"d"),(5,"b")]
 
-    def getSize(self):
+    def getSize(self)->dict:
+        """Method returns the size of the list"""
         DEBUG(f"GETSIZE: {len(self.playlists)}")
         return len(self.playlists)
     
-    def add_playlist(self,name):
+    def add_playlist(self,name)->None:
+        """Method adds a playlist"""
         self.playlists[name] =[]
 
-    def delete_playlist(self,key):
+    def delete_playlist(self,key)->None:
+        """Method deletes a playlist"""
         self.playlists.pop(key, None)
 
-    def rename_playlist(self,oldkey,newkey):
-        if newkey!=oldkey:  
+    def rename_playlist(self,oldkey,newkey)->None:
+        """Method renames a playlist"""
+        if newkey!=oldkey:
+            #grab new key and replace the old key
             self.playlists[newkey] = self.playlists[oldkey]
             del self.playlists[oldkey]
     
-    def move_playlistFile(self,name,index,direction):
+    def move_playlistFile(self,name,index,direction)->None:
+        """Method moves a playlist file up or down"""
         reindex = index-1
+        #if direction is up, then swap indexs and list locations with the file above
         if direction == "up":
             if reindex != 0:
                 move_up_list = list(self.playlists[name][reindex])
@@ -142,6 +141,7 @@ class PlaylistLibrary:
                 self.playlists[name][reindex], self.playlists[name][reindex-1] = self.playlists[name][reindex-1], self.playlists[name][reindex]
         
         else:
+            #if direction is not up (down), select then select the file below and swap index and list position
             playlistlength = len(self.playlists[name])-1
             reindex += 1
             if reindex <= playlistlength:
@@ -153,30 +153,24 @@ class PlaylistLibrary:
                 self.playlists[name][reindex-1] = tuple(move_down_list)
                 self.playlists[name][reindex], self.playlists[name][reindex-1] = self.playlists[name][reindex-1], self.playlists[name][reindex]
 
-    def delete_file_from_playist(self,name,index):
+    def delete_file_from_playist(self,name,index)->None:
+        """Method deletes a file from a playlist, it then re-indexes the remaining files"""
+        #delete the selected file
         for i in self.playlists[name]:
             if i[0] == index:
-                print(i[0])
                 self.playlists[name].pop(self.playlists[name].index(i))
         reindex = 1
+        #reindex remaining files
         for i in range(len(self.playlists[name])):
-            print(self.playlists[name][i])
             edit = list(self.playlists[name][i])
             edit[0] = reindex
             self.playlists[name][i] = tuple(edit)
-            print(self.playlists[name][i])
-            #i[0] = reindex
-            #print(i)
             reindex += 1
 
-    def add_file_to_playlist(self,name,mediaFile):
-        print(self.playlists[name])
+    def add_file_to_playlist(self,name,mediaFile)->None:
+        """Method adds a mediafile object to a playlist"""
         tupToAdd = tuple((len(self.playlists[name])+1,mediaFile))
-        print(tupToAdd)
+        DEBUG(f"add_file_to_playlist - Adding {tupToAdd}")
         self.playlists[name].append(tupToAdd)   
 
-    def exportLibrary(self):
-        export = {}
-        export["PLAYLISTS"] = json.dumps(self.playlists)
-        return export
 

@@ -27,10 +27,10 @@ class databasconnectortest(unittest.TestCase):
     global file
     global file2
     global filetypes
-    testimageFile =  dname +  r"\Application Documentation\Test Documents\logo.gif"
-    testMediaFile =   dname +  r"\Application Documentation\Test Documents\Coldplay - Adventure Of A Lifetime.mp4"
-    testMediaFile2 =  dname +  r"\Application Documentation\Test Documents\Coldplay - Yellow.mp4"
-    testMediaFolder = dname +  r"\Application Documentation\Test Documents"
+    testimageFile =  dname +   r"\Test Documents\logo.gif"
+    testMediaFile =   dname +  r"\Test Documents\Coldplay - Adventure Of A Lifetime.mp4"
+    testMediaFile2 =  dname +  r"\Test Documents\Coldplay - Yellow.mp4"
+    testMediaFolder = dname +  r"\Test Documents"
     print("FOLDER", testMediaFolder)
     file = None
     file2 = MediaFile(testMediaFile2)
